@@ -1,5 +1,7 @@
 import z from 'zod';
 
+export const todoIdSchema = z.cuid();
+
 export const loginFormSchema = z.object({
   email: z.email().min(1, {
     message: 'Email is required',

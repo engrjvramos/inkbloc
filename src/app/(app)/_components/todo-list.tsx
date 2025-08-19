@@ -1,8 +1,10 @@
-import { TUserTodos } from '@/server/actions';
-import { use } from 'react';
+'use client';
 
-export default function TodoList({ todosPromise }: { todosPromise: Promise<TUserTodos[]> }) {
-  const todos = use(todosPromise);
+import { useTodosContext } from '@/components/providers/note-context-provider';
+
+export default function TodoList() {
+  const { todos } = useTodosContext();
+
   return (
     <ul className="flex w-full flex-col gap-2">
       {todos.length > 0 &&

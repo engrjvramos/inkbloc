@@ -1,8 +1,13 @@
+import { TodosContextProvider } from '@/components/providers/note-context-provider';
+import { checkAuth, getTodosByUserId } from '@/lib/server-utils';
 import Link from 'next/link';
 import { ReactNode } from 'react';
 import Header from './_components/header';
 
-export default function PageLayout({ children }: { children: ReactNode }) {
+export default async function PageLayout({ children }: { children: ReactNode }) {
+  const session = await checkAuth();
+  const todos = await getTodosByUserId(session.user.id);
+
   return (
     <div className="flex h-dvh overflow-hidden">
       <aside className="min-w-72 border-r">
@@ -15,7 +20,9 @@ export default function PageLayout({ children }: { children: ReactNode }) {
       </aside>
       <div className="flex flex-1 flex-col">
         <Header />
-        <main className="flex-1 p-10">{children}</main>
+        <main className="flex-1 p-10">
+          <TodosContextProvider data={todos}>{children}</TodosContextProvider>
+        </main>
       </div>
     </div>
   );

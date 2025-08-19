@@ -2,7 +2,8 @@
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { todoSchema, TTodoSchema } from '@/lib/schema';
+import { todoIdSchema, todoSchema, TTodoSchema } from '@/lib/schema';
+import { checkAuth, getTodoById } from '@/lib/server-utils';
 import { ApiResponse } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
@@ -115,3 +116,59 @@ export async function createTodo(values: TTodoSchema): Promise<ApiResponse> {
 }
 
 export type TUserTodos = Awaited<ReturnType<typeof getTodos>>[0];
+
+export async function deleteTodo(id: string): Promise<ApiResponse> {
+  const session = await checkAuth();
+
+  const validatedTodoId = todoIdSchema.safeParse(id);
+  if (!validatedTodoId.success) {
+    return {
+      success: false,
+      message: 'Invalid todo data.',
+    };
+  }
+
+  const todo = await getTodoById(validatedTodoId.data);
+  if (!todo) {
+    return {
+      success: false,
+      message: 'Todo not found',
+    };
+  }
+  if (todo.userId !== session.user.id) {
+    return {
+      success: false,
+      message: 'Not authorized.',
+    };
+  }
+
+  try {
+    const note = await prisma.todo.findUnique({
+      where: { id },
+    });
+
+    if (!note) {
+      return {
+        success: false,
+        message: 'Note not found',
+      };
+    }
+
+    await prisma.todo.delete({
+      where: { id },
+    });
+
+    revalidatePath('/', 'layout');
+
+    return {
+      success: true,
+      message: 'Todo deleted successfully',
+    };
+  } catch (error) {
+    const e = error as Error;
+    return {
+      success: false,
+      message: e.message || 'Failed to delete todo',
+    };
+  }
+}

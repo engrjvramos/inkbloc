@@ -1,5 +1,4 @@
 import { auth } from '@/lib/auth';
-import { getTodos } from '@/server/actions';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
@@ -13,13 +12,11 @@ export default async function Home() {
 
   if (!session) redirect('/login');
 
-  const todosPromise = getTodos();
-
   return (
     <div className="mx-auto max-w-[90rem]">
       <TodoForm />
       <Suspense fallback={<p>Loading...</p>}>
-        <TodoList todosPromise={todosPromise} />
+        <TodoList />
       </Suspense>
     </div>
   );
