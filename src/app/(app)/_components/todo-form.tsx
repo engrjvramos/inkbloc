@@ -1,19 +1,17 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { useTodosContext } from '@/components/providers/note-context-provider';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { tryCatch } from '@/hooks/try-catch';
 import { todoSchema, TTodoSchema } from '@/lib/schema';
-import { createTodo } from '@/server/actions';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 export default function TodoForm() {
-  const [pending, startTransition] = useTransition();
+  const { handleAddTodo } = useTodosContext();
+  const [, startTransition] = useTransition();
 
   const form = useForm<TTodoSchema>({
     resolver: zodResolver(todoSchema),
@@ -23,20 +21,16 @@ export default function TodoForm() {
   });
 
   async function onSubmit(values: TTodoSchema) {
+    const prevValue = values.todo;
+    form.reset();
+
     startTransition(async () => {
-      const action = createTodo(values);
-
-      const { data: result, error } = await tryCatch(action);
-      if (error) {
-        toast.error('An unexpected error occurred. Please try again.');
-        return;
-      }
-
-      if (result.success) {
-        toast.success(result.message);
-        form.reset();
-      } else if (!result.success) {
-        toast.error(result.message);
+      try {
+        await handleAddTodo(values);
+      } catch (error) {
+        const e = error as Error;
+        toast.error(e.message || 'Failed to add todo');
+        form.setValue('todo', prevValue);
       }
     });
   }
@@ -58,18 +52,11 @@ export default function TodoForm() {
             )}
           />
 
-          <div className="flex items-center justify-end gap-2">
+          {/* <div className="flex items-center justify-end gap-2">
             <Button type="submit" className="h-11 text-white" disabled={pending}>
-              {pending ? (
-                <>
-                  <Loader2 className="size-5 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'Add Todo'
-              )}
+              Add Todo
             </Button>
-          </div>
+          </div> */}
         </form>
       </Form>
     </div>

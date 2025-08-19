@@ -1,5 +1,6 @@
 'use client';
 
+import { TodoEssentials } from '@/lib/types';
 import { createTodo, deleteTodo } from '@/server/actions';
 import { Todo } from '@prisma/client';
 import { createContext, useContext, useOptimistic, useState } from 'react';
@@ -10,7 +11,7 @@ type TTodosContext = {
   selectedTodoId: Todo['id'] | null;
   selectedTodo: Todo | undefined;
   todosCount: number;
-  handleAddTodo: (newTodo: Todo) => Promise<void>;
+  handleAddTodo: (newTodo: TodoEssentials) => Promise<void>;
   handleDeleteTodo: (id: Todo['id']) => Promise<void>;
   handleChangeSelectedTodoId: (id: Todo['id']) => void;
 };
@@ -40,11 +41,12 @@ export function TodosContextProvider({ children, data }: TodosProviderProps) {
   const selectedTodo = optimisticTodos.find((todo: Todo) => todo.id === selectedTodoId);
   const todosCount = optimisticTodos.length;
 
-  const handleAddTodo = async (newTodo: Todo) => {
+  const handleAddTodo = async (newTodo: TodoEssentials) => {
     setOptimisticTodos({ action: 'add', payload: newTodo });
-    const error = await createTodo(newTodo);
-    if (error) {
-      toast.warning(error.message);
+    const response = await createTodo(newTodo);
+
+    if (!response.success) {
+      toast.warning(response.message);
       return;
     }
   };

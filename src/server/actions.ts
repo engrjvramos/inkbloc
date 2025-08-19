@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { todoIdSchema, todoSchema, TTodoSchema } from '@/lib/schema';
+import { todoIdSchema, todoSchema } from '@/lib/schema';
 import { checkAuth, getTodoById } from '@/lib/server-utils';
 import { ApiResponse } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
@@ -75,13 +75,9 @@ export async function getTodos() {
   return data;
 }
 
-export async function createTodo(values: TTodoSchema): Promise<ApiResponse> {
+export async function createTodo(values: unknown): Promise<ApiResponse> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    const userId = session?.user.id || '';
+    const session = await checkAuth();
     const validation = todoSchema.safeParse(values);
 
     if (!validation.success) {
@@ -91,13 +87,14 @@ export async function createTodo(values: TTodoSchema): Promise<ApiResponse> {
       };
     }
 
-    // Extract tags from validated form data
-    const { todo } = validation.data;
-
     await prisma.todo.create({
       data: {
-        todo,
-        userId,
+        ...validation.data,
+        user: {
+          connect: {
+            id: session.user.id,
+          },
+        },
       },
     });
 
