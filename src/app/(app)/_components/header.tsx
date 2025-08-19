@@ -23,7 +23,7 @@ export default function Header() {
   }
 
   return (
-    <header className="flex h-20 items-center justify-between px-5">
+    <header className="flex h-20 shrink-0 items-center justify-between border-b px-5">
       Header
       <div className="flex items-center gap-2">
         <ThemeToggler />

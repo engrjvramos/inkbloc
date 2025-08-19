@@ -52,12 +52,6 @@ export default function TodoForm() {
               </FormItem>
             )}
           />
-
-          {/* <div className="flex items-center justify-end gap-2">
-            <Button type="submit" className="h-11 text-white" disabled={pending}>
-              Add Todo
-            </Button>
-          </div> */}
         </form>
       </Form>
     </div>

@@ -1,18 +1,41 @@
 'use client';
 
+import { useFiltersContext } from '@/components/providers/filters-context-provider';
 import { useTodosContext } from '@/components/providers/note-context-provider';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { Todo } from '@prisma/client';
-import { StarIcon } from 'lucide-react';
-import { useTransition } from 'react';
+import { GripVerticalIcon, StarIcon } from 'lucide-react';
+import { useMemo, useTransition } from 'react';
 import { toast } from 'sonner';
 import DropdownActions from './dropdown-actions';
+import TodoFilters from './todo-filters';
 
 export default function TodoList() {
   const { todos, handleDeleteTodo, handleEditTodo } = useTodosContext();
+  const { searchQuery, selectedStatuses } = useFiltersContext();
   const [, startTransition] = useTransition();
+
+  const filteredTodos = useMemo(() => {
+    return todos.filter((todo) => {
+      const matchesQuery = todo.todo.toLowerCase().includes(searchQuery.toLowerCase().trim());
+
+      const todoStatuses: string[] = [];
+      if (todo.isComplete) {
+        todoStatuses.push('completed');
+      } else {
+        todoStatuses.push('active');
+      }
+      if (todo.isImportant) {
+        todoStatuses.push('important');
+      }
+      const matchesStatus =
+        selectedStatuses.length === 0 || selectedStatuses.some((status) => todoStatuses.includes(status));
+
+      return matchesQuery && matchesStatus;
+    });
+  }, [todos, searchQuery, selectedStatuses]);
 
   async function handleToggleField(id: string, todo: Todo, field: 'isComplete' | 'isImportant') {
     startTransition(async () => {
@@ -37,11 +60,13 @@ export default function TodoList() {
   }
 
   return (
-    <ul className="no-scrollbar my-10 flex h-[80dvh] w-full flex-col gap-2 overflow-y-auto">
-      {todos.length > 0 &&
-        todos.map((todo) => (
+    <div className="flex flex-col gap-10">
+      <TodoFilters />
+      <ul className="no-scrollbar flex max-h-[calc(100dvh-18rem)] w-full flex-col gap-2 overflow-y-auto">
+        {filteredTodos.map((todo) => (
           <li key={todo.id} className="flex w-full items-center justify-between gap-5 rounded-md border px-4 py-2">
             <div className="flex w-full items-center gap-4">
+              <GripVerticalIcon className="text-muted-foreground" />
               <Checkbox
                 className="size-5 rounded-full"
                 checked={todo.isComplete}
@@ -62,6 +87,7 @@ export default function TodoList() {
             </div>
           </li>
         ))}
-    </ul>
+      </ul>
+    </div>
   );
 }

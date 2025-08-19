@@ -13,7 +13,7 @@ export default async function Home() {
   if (!session) redirect('/login');
 
   return (
-    <div className="mx-auto max-w-[90rem]">
+    <div className="mx-auto flex max-w-[90rem] flex-col gap-5">
       <TodoForm />
       <Suspense fallback={<p>Loading...</p>}>
         <TodoList />

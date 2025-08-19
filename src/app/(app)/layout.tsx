@@ -1,3 +1,4 @@
+import FiltersContextProvider from '@/components/providers/filters-context-provider';
 import { TodosContextProvider } from '@/components/providers/note-context-provider';
 import { checkAuth, getTodosByUserId } from '@/lib/server-utils';
 import Link from 'next/link';
@@ -21,7 +22,9 @@ export default async function PageLayout({ children }: { children: ReactNode }) 
       <div className="flex flex-1 flex-col">
         <Header />
         <main className="flex-1 p-10">
-          <TodosContextProvider data={todos}>{children}</TodosContextProvider>
+          <FiltersContextProvider>
+            <TodosContextProvider data={todos}>{children}</TodosContextProvider>
+          </FiltersContextProvider>
         </main>
       </div>
     </div>
