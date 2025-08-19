@@ -52,14 +52,11 @@ export const resetPasswordFormSchema = z
   });
 
 export const todoSchema = z.object({
-  todo: z
-    .string()
-    .min(1, {
-      message: 'Todo is required',
-    })
-    .max(100, {
-      message: 'Todo must be at most 100 characters long',
-    }),
+  todo: z.string().max(250, {
+    message: 'Todo must be at most 250 characters long',
+  }),
+  isComplete: z.boolean().default(false).nonoptional(),
+  isImportant: z.boolean().default(false).nonoptional(),
 });
 
 export type TTodoSchema = z.infer<typeof todoSchema>;

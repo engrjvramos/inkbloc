@@ -1,7 +1,7 @@
 'use client';
 
 import { TodoEssentials } from '@/lib/types';
-import { createTodo, deleteTodo } from '@/server/actions';
+import { createTodo, deleteTodo, editTodo } from '@/server/actions';
 import { Todo } from '@prisma/client';
 import { createContext, useContext, useOptimistic, useState } from 'react';
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ type TTodosContext = {
   selectedTodo: Todo | undefined;
   todosCount: number;
   handleAddTodo: (newTodo: TodoEssentials) => Promise<void>;
+  handleEditTodo: (todoId: Todo['id'], newTodoData: TodoEssentials) => Promise<void>;
   handleDeleteTodo: (id: Todo['id']) => Promise<void>;
   handleChangeSelectedTodoId: (id: Todo['id']) => void;
 };
@@ -27,7 +28,14 @@ export function TodosContextProvider({ children, data }: TodosProviderProps) {
   const [optimisticTodos, setOptimisticTodos] = useOptimistic(data, (state, { action, payload }) => {
     switch (action) {
       case 'add':
-        return [...state, { ...payload, id: Math.random().toString() }];
+        return [{ ...payload, id: Math.random().toString() }, ...state];
+      case 'edit':
+        return state.map((todo) => {
+          if (todo.id === payload.id) {
+            return { ...todo, ...payload.newTodoData };
+          }
+          return todo;
+        });
       case 'delete':
         return state.filter((todo) => todo.id !== payload);
       default:
@@ -51,11 +59,21 @@ export function TodosContextProvider({ children, data }: TodosProviderProps) {
     }
   };
 
+  const handleEditTodo = async (todoId: Todo['id'], newTodoData: TodoEssentials) => {
+    setOptimisticTodos({ action: 'edit', payload: { id: todoId, newTodoData } });
+    const response = await editTodo(todoId, newTodoData);
+
+    if (!response.success) {
+      toast.warning(response.message);
+      return;
+    }
+  };
+
   const handleDeleteTodo = async (todoId: Todo['id']) => {
     setOptimisticTodos({ action: 'delete', payload: todoId });
-    const error = await deleteTodo(todoId);
-    if (error) {
-      toast.warning(error.message);
+    const response = await deleteTodo(todoId);
+    if (!response.success) {
+      toast.warning(response.message);
       return;
     }
     setSelectedTodoId(null);
@@ -73,6 +91,7 @@ export function TodosContextProvider({ children, data }: TodosProviderProps) {
         selectedTodo,
         todosCount,
         handleAddTodo,
+        handleEditTodo,
         handleDeleteTodo,
         handleChangeSelectedTodoId,
       }}

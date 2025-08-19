@@ -28,10 +28,13 @@ export async function getTodoById(todoId: Todo['id']) {
 }
 
 export async function getTodosByUserId(userId: User['id']) {
-  const pets = await prisma.todo.findMany({
+  const todos = await prisma.todo.findMany({
     where: {
       userId,
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
-  return pets;
+  return todos;
 }

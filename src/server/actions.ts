@@ -2,8 +2,8 @@
 
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { todoIdSchema, todoSchema } from '@/lib/schema';
-import { checkAuth, getTodoById } from '@/lib/server-utils';
+import { todoSchema, TTodoSchema } from '@/lib/schema';
+import { checkAuth } from '@/lib/server-utils';
 import { ApiResponse } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
@@ -115,30 +115,6 @@ export async function createTodo(values: unknown): Promise<ApiResponse> {
 export type TUserTodos = Awaited<ReturnType<typeof getTodos>>[0];
 
 export async function deleteTodo(id: string): Promise<ApiResponse> {
-  const session = await checkAuth();
-
-  const validatedTodoId = todoIdSchema.safeParse(id);
-  if (!validatedTodoId.success) {
-    return {
-      success: false,
-      message: 'Invalid todo data.',
-    };
-  }
-
-  const todo = await getTodoById(validatedTodoId.data);
-  if (!todo) {
-    return {
-      success: false,
-      message: 'Todo not found',
-    };
-  }
-  if (todo.userId !== session.user.id) {
-    return {
-      success: false,
-      message: 'Not authorized.',
-    };
-  }
-
   try {
     const note = await prisma.todo.findUnique({
       where: { id },
@@ -167,5 +143,32 @@ export async function deleteTodo(id: string): Promise<ApiResponse> {
       success: false,
       message: e.message || 'Failed to delete todo',
     };
+  }
+}
+
+export async function editTodo(todoId: string, values: TTodoSchema): Promise<ApiResponse> {
+  try {
+    const validation = todoSchema.safeParse(values);
+    if (!validation.success) {
+      return { success: false, message: 'Invalid form data' };
+    }
+
+    const { todo, isComplete, isImportant } = validation.data;
+
+    await prisma.todo.update({
+      where: { id: todoId },
+      data: {
+        todo,
+        isComplete,
+        isImportant,
+      },
+    });
+
+    revalidatePath('/', 'layout');
+
+    return { success: true, message: 'Todo updated successfully' };
+  } catch (error) {
+    console.error('Error updating todo:', error);
+    return { success: false, message: error instanceof Error ? error.message : 'Failed to update todo' };
   }
 }

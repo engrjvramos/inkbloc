@@ -21,12 +21,13 @@ export default function TodoForm() {
   });
 
   async function onSubmit(values: TTodoSchema) {
+    if (!values.todo) return;
     const prevValue = values.todo;
     form.reset();
 
     startTransition(async () => {
       try {
-        await handleAddTodo(values);
+        await handleAddTodo({ ...values, isComplete: false, isImportant: false });
       } catch (error) {
         const e = error as Error;
         toast.error(e.message || 'Failed to add todo');
@@ -44,7 +45,7 @@ export default function TodoForm() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input placeholder="Enter your title..." className="h-11" maxLength={100} autoFocus {...field} />
+                  <Input placeholder="Type a todo..." className="h-11" maxLength={250} autoFocus {...field} />
                 </FormControl>
 
                 <FormMessage />
