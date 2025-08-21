@@ -1,0 +1,161 @@
+'use client';
+
+import { TUserTodoLists } from '@/lib/types';
+import { createList, deleteList, editList } from '@/server/list-actions';
+import { createContext, useContext, useOptimistic, useState } from 'react';
+import { toast } from 'sonner';
+
+type TListsContext = {
+  lists: TUserTodoLists[];
+  selectedListId: string | null;
+  selectedList: TUserTodoLists | undefined;
+  listsCount: number;
+
+  handleAddList: (title: string) => Promise<void>;
+  handleEditList: (listId: string, newListData: Partial<TUserTodoLists>) => Promise<void>;
+  handleDeleteList: (listId: string) => Promise<void>;
+  handleChangeSelectedListId: (id: string) => void;
+  handleIncrementCount: () => Promise<void>;
+  handleDecrementCount: () => Promise<void>;
+};
+
+const ListsContext = createContext<TListsContext | null>(null);
+
+type ListsProviderProps = {
+  data: TUserTodoLists[];
+  children: React.ReactNode;
+};
+
+export function ListsContextProvider({ children, data }: ListsProviderProps) {
+  const [optimisticLists, setOptimisticLists] = useOptimistic(data, (state, { action, payload }) => {
+    switch (action) {
+      case 'add':
+        return [
+          ...state,
+          {
+            ...payload,
+            id: Math.random().toString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            todos: [],
+            _count: { todos: 0 },
+          },
+        ];
+      case 'edit':
+        return state.map((list) =>
+          list.id === payload.id ? { ...list, ...payload.newListData, updatedAt: new Date().toISOString() } : list,
+        );
+      case 'delete':
+        return state.filter((list) => list.id !== payload);
+      case 'incrementCount':
+        return state.map((list) =>
+          list.id === payload.listId
+            ? {
+                ...list,
+                _count: {
+                  ...list._count,
+                  todos: list._count.todos + 1,
+                },
+              }
+            : list,
+        );
+      case 'decrementCount':
+        return state.map((list) =>
+          list.id === payload.listId
+            ? {
+                ...list,
+                _count: {
+                  ...list._count,
+                  todos: Math.max(0, list._count.todos - 1),
+                },
+              }
+            : list,
+        );
+
+      default:
+        return state;
+    }
+  });
+
+  const [selectedListId, setSelectedListId] = useState<string | null>(
+    () => optimisticLists.find((list) => list.isDefault)?.id ?? null,
+  );
+
+  // derived state
+  const selectedList = optimisticLists.find((list) => list.id === selectedListId);
+  const listsCount = optimisticLists.length;
+
+  // handlers
+  const handleAddList = async (title: string) => {
+    setOptimisticLists({ action: 'add', payload: { title } });
+    const response = await createList(title);
+
+    if (!response.success) {
+      toast.warning(response.message);
+      return;
+    }
+  };
+
+  const handleEditList = async (listId: string, newListData: Partial<TUserTodoLists>) => {
+    setOptimisticLists({ action: 'edit', payload: { id: listId, newListData } });
+    const response = await editList(listId, newListData);
+
+    if (!response.success) {
+      toast.warning(response.message);
+      return;
+    }
+  };
+
+  const handleDeleteList = async (listId: string) => {
+    setOptimisticLists({ action: 'delete', payload: listId });
+    const response = await deleteList(listId);
+
+    if (!response.success) {
+      toast.warning(response.message);
+      return;
+    }
+
+    if (selectedListId === listId) {
+      setSelectedListId(null);
+    }
+  };
+
+  const handleIncrementCount = async () => {
+    setOptimisticLists({ action: 'incrementCount', payload: { listId: selectedListId } });
+  };
+
+  const handleDecrementCount = async () => {
+    setOptimisticLists({ action: 'decrementCount', payload: { listId: selectedListId } });
+  };
+
+  const handleChangeSelectedListId = (id: string) => {
+    setSelectedListId(id);
+  };
+
+  return (
+    <ListsContext.Provider
+      value={{
+        lists: optimisticLists,
+        selectedListId,
+        selectedList,
+        listsCount,
+        handleAddList,
+        handleEditList,
+        handleDeleteList,
+        handleChangeSelectedListId,
+        handleIncrementCount,
+        handleDecrementCount,
+      }}
+    >
+      {children}
+    </ListsContext.Provider>
+  );
+}
+
+export function useListsContext() {
+  const context = useContext(ListsContext);
+  if (!context) {
+    throw new Error('useListsContext must be used within a ListsProvider');
+  }
+  return context;
+}

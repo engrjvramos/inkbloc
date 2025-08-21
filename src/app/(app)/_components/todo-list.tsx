@@ -1,6 +1,7 @@
 'use client';
 
 import { useFiltersContext } from '@/components/providers/filters-context-provider';
+import { useListsContext } from '@/components/providers/list-context-provider';
 import { useTodosContext } from '@/components/providers/note-context-provider';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,9 +11,9 @@ import { GripVerticalIcon, StarIcon } from 'lucide-react';
 import { useMemo, useTransition } from 'react';
 import { toast } from 'sonner';
 import DropdownActions from './dropdown-actions';
-import TodoFilters from './todo-filters';
 
 export default function TodoList() {
+  const { handleIncrementCount, handleDecrementCount } = useListsContext();
   const { todos, handleDeleteTodo, handleEditTodo } = useTodosContext();
   const { searchQuery, selectedStatuses } = useFiltersContext();
   const [, startTransition] = useTransition();
@@ -50,9 +51,11 @@ export default function TodoList() {
 
   async function handleDelete(id: string) {
     startTransition(async () => {
+      handleDecrementCount();
       try {
         await handleDeleteTodo(id);
       } catch (error) {
+        handleIncrementCount();
         const e = error as Error;
         toast.error(e.message || 'Failed to add todo');
       }
@@ -61,7 +64,6 @@ export default function TodoList() {
 
   return (
     <div className="flex flex-col gap-10">
-      <TodoFilters />
       <ul className="no-scrollbar flex max-h-[calc(100dvh-18rem)] w-full flex-col gap-2 overflow-y-auto">
         {filteredTodos.map((todo) => (
           <li key={todo.id} className="flex w-full items-center justify-between gap-5 rounded-md border px-4 py-2">

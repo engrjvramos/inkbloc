@@ -1,3 +1,5 @@
+'use client';
+
 import { useFiltersContext } from '@/components/providers/filters-context-provider';
 import { useTodosContext } from '@/components/providers/note-context-provider';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -38,7 +40,7 @@ export default function TodoFilters() {
         <div className="relative">
           <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-5 -translate-y-1/2" />
           <Input
-            className="h-10 max-w-lg pl-10"
+            className="max-w-lg pl-10"
             placeholder="Search todos..."
             type="search"
             value={searchQuery}

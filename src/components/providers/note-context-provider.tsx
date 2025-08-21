@@ -1,13 +1,14 @@
 'use client';
 
-import { TodoEssentials } from '@/lib/types';
+import { TodoEssentials, TUserTodoLists } from '@/lib/types';
 import { createTodo, deleteTodo, editTodo } from '@/server/actions';
 import { Todo } from '@prisma/client';
-import { createContext, useContext, useOptimistic, useState } from 'react';
+import { createContext, ReactNode, useContext, useOptimistic, useState } from 'react';
 import { toast } from 'sonner';
+import { useListsContext } from './list-context-provider';
 
 type TTodosContext = {
-  todos: Todo[];
+  todos: TUserTodoLists['todos'];
   selectedTodoId: Todo['id'] | null;
   selectedTodo: Todo | undefined;
   todosCount: number;
@@ -19,23 +20,17 @@ type TTodosContext = {
 
 const TodosContext = createContext<TTodosContext | null>(null);
 
-type TodosProviderProps = {
-  data: Todo[];
-  children: React.ReactNode;
-};
+export function TodosContextProvider({ children }: { children: ReactNode }) {
+  const { selectedList } = useListsContext();
 
-export function TodosContextProvider({ children, data }: TodosProviderProps) {
-  const [optimisticTodos, setOptimisticTodos] = useOptimistic(data, (state, { action, payload }) => {
+  const initialTodos = selectedList ? selectedList.todos : [];
+
+  const [optimisticTodos, setOptimisticTodos] = useOptimistic(initialTodos, (state, { action, payload }) => {
     switch (action) {
       case 'add':
         return [{ ...payload, id: Math.random().toString() }, ...state];
       case 'edit':
-        return state.map((todo) => {
-          if (todo.id === payload.id) {
-            return { ...todo, ...payload.newTodoData };
-          }
-          return todo;
-        });
+        return state.map((todo) => (todo.id === payload.id ? { ...todo, ...payload.newTodoData } : todo));
       case 'delete':
         return state.filter((todo) => todo.id !== payload);
       default:
@@ -46,16 +41,17 @@ export function TodosContextProvider({ children, data }: TodosProviderProps) {
   const [selectedTodoId, setSelectedTodoId] = useState<string | null>(null);
 
   // derived state
-  const selectedTodo = optimisticTodos.find((todo: Todo) => todo.id === selectedTodoId);
+  const selectedTodo = optimisticTodos.find((todo) => todo.id === selectedTodoId);
   const todosCount = optimisticTodos.length;
 
   const handleAddTodo = async (newTodo: TodoEssentials) => {
+    if (!selectedList) return;
+
     setOptimisticTodos({ action: 'add', payload: newTodo });
-    const response = await createTodo(newTodo);
+    const response = await createTodo({ ...newTodo, listId: selectedList.id });
 
     if (!response.success) {
       toast.warning(response.message);
-      return;
     }
   };
 
@@ -65,16 +61,15 @@ export function TodosContextProvider({ children, data }: TodosProviderProps) {
 
     if (!response.success) {
       toast.warning(response.message);
-      return;
     }
   };
 
   const handleDeleteTodo = async (todoId: Todo['id']) => {
     setOptimisticTodos({ action: 'delete', payload: todoId });
     const response = await deleteTodo(todoId);
+
     if (!response.success) {
       toast.warning(response.message);
-      return;
     }
     setSelectedTodoId(null);
   };

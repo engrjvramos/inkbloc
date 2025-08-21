@@ -59,4 +59,17 @@ export const todoSchema = z.object({
   isImportant: z.boolean().default(false).nonoptional(),
 });
 
+export const listSchema = z.object({
+  title: z
+    .string()
+    .min(1, {
+      message: 'Title is required',
+    })
+    .max(100, {
+      message: 'Title must be at most 100 characters long',
+    }),
+});
+
 export type TTodoSchema = z.infer<typeof todoSchema>;
+
+export type TListSchema = z.infer<typeof listSchema>;

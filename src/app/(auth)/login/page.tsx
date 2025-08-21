@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { CloseToast } from '@/components/ui/sonner';
 import { authClient } from '@/lib/auth-client';
 import { loginFormSchema } from '@/lib/schema';
-import { signInUser } from '@/server/actions';
+import { signInUser } from '@/server/auth-actions';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EyeIcon, EyeOffIcon, Loader2 } from 'lucide-react';

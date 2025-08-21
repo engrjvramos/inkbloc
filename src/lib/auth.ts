@@ -13,6 +13,7 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
@@ -51,4 +52,19 @@ export const auth = betterAuth({
     },
   },
   plugins: [nextCookies()],
+  databaseHooks: {
+    user: {
+      create: {
+        after: async ({ id }) => {
+          await prisma.list.create({
+            data: {
+              title: 'My List',
+              isDefault: true,
+              userId: id,
+            },
+          });
+        },
+      },
+    },
+  },
 });

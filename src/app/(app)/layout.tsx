@@ -1,32 +1,25 @@
 import FiltersContextProvider from '@/components/providers/filters-context-provider';
+import { ListsContextProvider } from '@/components/providers/list-context-provider';
 import { TodosContextProvider } from '@/components/providers/note-context-provider';
-import { checkAuth, getTodosByUserId } from '@/lib/server-utils';
-import Link from 'next/link';
+import { checkAuth } from '@/lib/server-utils';
+import { getTodoLists } from '@/server/list-actions';
 import { ReactNode } from 'react';
 import Header from './_components/header';
 
 export default async function PageLayout({ children }: { children: ReactNode }) {
   const session = await checkAuth();
-  const todos = await getTodosByUserId(session.user.id);
+  const lists = await getTodoLists();
 
   return (
-    <div className="flex h-dvh overflow-hidden">
-      <aside className="min-w-72 border-r">
-        <div className="flex h-20 items-center justify-center text-2xl font-bold">InkBloc</div>
-        <div>
-          <Link href={'/'} className="hover:bg-accent inline-flex w-full items-center gap-2 rounded px-4 py-2">
-            My List
-          </Link>
-        </div>
-      </aside>
-      <div className="flex flex-1 flex-col">
-        <Header />
-        <main className="flex-1 p-10">
-          <FiltersContextProvider>
-            <TodosContextProvider data={todos}>{children}</TodosContextProvider>
-          </FiltersContextProvider>
-        </main>
-      </div>
+    <div className="mx-auto flex h-dvh max-w-[80rem] flex-col overflow-hidden">
+      <Header userSession={session.user} />
+      <main className="flex-1 px-5 py-10">
+        <FiltersContextProvider>
+          <ListsContextProvider data={lists}>
+            <TodosContextProvider>{children}</TodosContextProvider>
+          </ListsContextProvider>
+        </FiltersContextProvider>
+      </main>
     </div>
   );
 }

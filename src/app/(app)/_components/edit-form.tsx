@@ -43,7 +43,7 @@ export default function EditForm({ initialValues, setDropdownOpen }: EditFormPro
 
     startTransition(async () => {
       try {
-        await handleEditTodo(initialValues.id, values);
+        await handleEditTodo(initialValues.id, { ...values, listId: initialValues.listId });
       } catch (error) {
         const e = error as Error;
         toast.error(e.message || 'Failed to add todo');

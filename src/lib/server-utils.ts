@@ -27,13 +27,19 @@ export async function getTodoById(todoId: Todo['id']) {
   return pet;
 }
 
-export async function getTodosByUserId(userId: User['id']) {
-  const todos = await prisma.todo.findMany({
+export async function getListsByUserId(userId: User['id']) {
+  const todos = await prisma.list.findMany({
     where: {
       userId,
     },
     orderBy: {
       createdAt: 'desc',
+    },
+    include: {
+      todos: true,
+      _count: {
+        select: { todos: true },
+      },
     },
   });
   return todos;
