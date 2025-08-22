@@ -49,9 +49,14 @@ export default function AddListForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={'ghost'} className="rounded-none outline-none focus-within:ring-0">
-          <PlusIcon size={16} aria-hidden="true" />
-          Add List
+        <Button
+          variant={'ghost'}
+          className="text-muted-foreground relative h-auto max-w-[10rem] rounded-md border-0 px-4 py-3 hover:bg-transparent dark:hover:bg-transparent"
+        >
+          <span className="bg-input inline-flex size-5 items-center justify-center rounded-full">
+            <PlusIcon size={16} aria-hidden="true" />
+          </span>
+          Add list
         </Button>
       </DialogTrigger>
       <DialogContent className="gap-8">
@@ -90,7 +95,7 @@ export default function AddListForm() {
                   </Button>
                 </DialogClose>
 
-                <Button type="submit" className="">
+                <Button type="submit" className="text-white">
                   Add List
                 </Button>
               </div>

@@ -97,7 +97,7 @@ export default function EditListForm({ initialValues, onFormSubmission }: Props)
                   </Button>
                 </DialogClose>
 
-                <Button type="submit" className="">
+                <Button type="submit" className="text-white">
                   Rename
                 </Button>
               </div>

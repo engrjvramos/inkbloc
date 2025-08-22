@@ -82,11 +82,12 @@ export async function deleteTodo(id: string): Promise<ApiResponse> {
   }
 }
 
-export async function deleteAllCompletedTodo(): Promise<ApiResponse> {
+export async function deleteAllTodos(type: 'completed' | 'active', listId: string): Promise<ApiResponse> {
   try {
     await prisma.todo.deleteMany({
       where: {
-        isComplete: true,
+        listId,
+        isComplete: type === 'completed' ? true : false,
       },
     });
 
@@ -94,13 +95,13 @@ export async function deleteAllCompletedTodo(): Promise<ApiResponse> {
 
     return {
       success: true,
-      message: 'All completed todos deleted successfully',
+      message: `All ${type} todos deleted successfully`,
     };
   } catch (error) {
     const e = error as Error;
     return {
       success: false,
-      message: e.message || 'Failed to delete completed todos',
+      message: e.message || `Failed to delete ${type} todos`,
     };
   }
 }

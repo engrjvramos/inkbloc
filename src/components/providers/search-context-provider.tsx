@@ -2,33 +2,33 @@
 
 import { createContext, useContext, useState } from 'react';
 
-type FiltersContextProvider = {
+type SearchContextProvider = {
   children: React.ReactNode;
 };
 
-type TFiltersContext = {
+type TSearchContext = {
   searchQuery: string;
   handleChangeSearchQuery: (newValue: string) => void;
   selectedStatuses: string[];
   handleToggleStatus: (status: string) => void;
 };
 
-export const FiltersContext = createContext<TFiltersContext | null>(null);
+export const SearchContext = createContext<TSearchContext | null>(null);
 
-export default function FiltersContextProvider({ children }: FiltersContextProvider) {
+export default function SearchContextProvider({ children }: SearchContextProvider) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-
-  const handleChangeSearchQuery = (newValue: string) => {
-    setSearchQuery(newValue);
-  };
 
   const handleToggleStatus = (status: string) => {
     setSelectedStatuses((prev) => (prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]));
   };
 
+  const handleChangeSearchQuery = (newValue: string) => {
+    setSearchQuery(newValue);
+  };
+
   return (
-    <FiltersContext.Provider
+    <SearchContext.Provider
       value={{
         searchQuery,
         handleChangeSearchQuery,
@@ -37,15 +37,15 @@ export default function FiltersContextProvider({ children }: FiltersContextProvi
       }}
     >
       {children}
-    </FiltersContext.Provider>
+    </SearchContext.Provider>
   );
 }
 
-export function useFiltersContext() {
-  const context = useContext(FiltersContext);
+export function useSearchContext() {
+  const context = useContext(SearchContext);
 
   if (!context) {
-    throw new Error('useFiltersContext must be used within a FiltersContextProvider');
+    throw new Error('useSearchContext must be used within a SearchContextProvider');
   }
 
   return context;

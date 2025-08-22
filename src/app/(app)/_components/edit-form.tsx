@@ -1,6 +1,5 @@
 import { useTodosContext } from '@/components/providers/note-context-provider';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogClose,
@@ -33,8 +32,6 @@ export default function EditForm({ initialValues, setDropdownOpen }: EditFormPro
     resolver: zodResolver(todoSchema),
     defaultValues: {
       todo: initialValues.todo,
-      isComplete: initialValues.isComplete,
-      isImportant: initialValues.isImportant,
     },
   });
 
@@ -43,13 +40,16 @@ export default function EditForm({ initialValues, setDropdownOpen }: EditFormPro
 
     startTransition(async () => {
       try {
-        await handleEditTodo(initialValues.id, { ...values, listId: initialValues.listId });
+        await handleEditTodo(initialValues.id, {
+          ...values,
+          listId: initialValues.listId,
+          isComplete: initialValues.isComplete,
+          isImportant: initialValues.isImportant,
+        });
       } catch (error) {
         const e = error as Error;
         toast.error(e.message || 'Failed to add todo');
         form.setValue('todo', prevValue.todo);
-        form.setValue('isComplete', prevValue.isComplete);
-        form.setValue('isImportant', prevValue.isImportant);
       }
     });
 
@@ -90,53 +90,6 @@ export default function EditForm({ initialValues, setDropdownOpen }: EditFormPro
                   </FormItem>
                 )}
               />
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr)))] gap-4">
-                <FormField
-                  control={form.control}
-                  name="isComplete"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <FormLabel
-                          htmlFor="isComplete"
-                          className="hover:bg-input flex h-11 w-full items-center space-x-2 rounded-md border px-4 py-2"
-                        >
-                          <Checkbox
-                            id="isComplete"
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="rounded-full"
-                          />
-                          Mark as complete
-                        </FormLabel>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="isImportant"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center space-x-2">
-                      <FormControl>
-                        <FormLabel
-                          htmlFor="isImportant"
-                          className="hover:bg-input flex h-11 w-full items-center space-x-2 rounded-md border px-4 py-2"
-                        >
-                          <Checkbox
-                            id="isImportant"
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="rounded-full"
-                          />
-                          Mark as important
-                        </FormLabel>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
 
               <div className="flex items-center justify-end gap-2">
                 <DialogClose asChild>

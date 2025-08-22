@@ -1,5 +1,6 @@
 'use client';
 
+import { useWindowSize } from '@/hooks/useWindowSize';
 import { authClient } from '@/lib/auth-client';
 import { getInitials } from '@/lib/utils';
 import { User } from 'better-auth';
@@ -20,6 +21,7 @@ import {
 import ThemeToggler from './theme-toggler';
 
 export default function HeaderDropdown({ userSession }: { userSession: User }) {
+  const size = useWindowSize();
   const router = useRouter();
 
   async function handleLogout() {
@@ -38,7 +40,25 @@ export default function HeaderDropdown({ userSession }: { userSession: User }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-auto p-0 hover:bg-transparent dark:hover:bg-transparent">
+        <Button variant="ghost" className="h-auto gap-5 p-0 select-none hover:bg-transparent dark:hover:bg-transparent">
+          {size.width >= 375 && (
+            <span className="w-full max-w-[16rem] truncate">
+              {(() => {
+                const hour = new Date().getHours();
+                let greeting = 'Hello';
+
+                if (hour < 12) {
+                  greeting = 'Good morning';
+                } else if (hour < 18) {
+                  greeting = 'Good afternoon';
+                } else {
+                  greeting = 'Good evening';
+                }
+
+                return `${greeting}, ${userSession.name.split(' ')[0]}!`;
+              })()}
+            </span>
+          )}
           <Avatar>
             <AvatarImage src={userSession.image || ''} alt="Profile image" />
             <AvatarFallback>{getInitials(userSession.name)}</AvatarFallback>

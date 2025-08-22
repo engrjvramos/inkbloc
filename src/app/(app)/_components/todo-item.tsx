@@ -1,3 +1,4 @@
+import { StarButton } from '@/components/star-button';
 import MoveTodo from '@/components/todo/move-todo';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { Todo } from '@prisma/client';
-import { GripVerticalIcon, MoreVerticalIcon, StarIcon, TrashIcon } from 'lucide-react';
+import { MoreVerticalIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import EditForm from './edit-form';
 
@@ -26,16 +27,15 @@ export default function TodoItem({ todo, handleDelete, handleToggleField, handle
   const [open, setOpen] = useState(false);
 
   return (
-    <li className="bg-background flex w-full items-center justify-between gap-5 rounded-md border px-4 py-2">
+    <li className="bg-background flex w-full items-center justify-between gap-5 rounded-md border px-4 py-2 text-sm sm:text-base">
       <div className="flex w-full items-center gap-4">
-        <GripVerticalIcon className="text-muted-foreground" />
         <Checkbox
-          className="size-5 rounded-full"
+          className="size-5 rounded-full checked:bg-sky-500"
           checked={todo.isComplete}
           onCheckedChange={() => handleToggleField(todo.id, todo, 'isComplete')}
         />
         <div className="flex flex-col">
-          <span className={cn(todo.isComplete && 'line-through opacity-50')}>{todo.todo}</span>
+          <span className={cn('line-clamp-3 w-full', todo.isComplete && 'line-through opacity-50')}>{todo.todo}</span>
           {todo.isComplete && (
             <span className="text-muted-foreground text-sm">
               Completed:{' '}
@@ -51,14 +51,10 @@ export default function TodoItem({ todo, handleDelete, handleToggleField, handle
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          title="Mark as important"
-          variant={'ghost'}
-          className="size-8"
-          onClick={() => handleToggleField(todo.id, todo, 'isImportant')}
-        >
-          <StarIcon className={cn('size-5 opacity-60', todo.isImportant && 'fill-primary opacity-100')} />
-        </Button>
+        <StarButton
+          initialStarred={todo.isImportant}
+          onStarClick={() => handleToggleField(todo.id, todo, 'isImportant')}
+        />
 
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
@@ -68,8 +64,8 @@ export default function TodoItem({ todo, handleDelete, handleToggleField, handle
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
-              <MoveTodo todo={todo} handleMoveTask={handleMoveTask} onFormSubmission={() => setOpen(false)} />
               <EditForm initialValues={todo} setDropdownOpen={setOpen} />
+              <MoveTodo todo={todo} handleMoveTask={handleMoveTask} onFormSubmission={() => setOpen(false)} />
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={() => handleDelete(todo.id)}>

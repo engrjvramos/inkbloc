@@ -1,7 +1,7 @@
 'use client';
 
 import { TodoEssentials, TUserTodoLists } from '@/lib/types';
-import { createTodo, deleteAllCompletedTodo, deleteTodo, editTodo, moveTodo } from '@/server/actions';
+import { createTodo, deleteAllTodos, deleteTodo, editTodo, moveTodo } from '@/server/actions';
 import { Todo } from '@prisma/client';
 import { createContext, ReactNode, useContext, useOptimistic, useState } from 'react';
 import { toast } from 'sonner';
@@ -16,7 +16,7 @@ type TTodosContext = {
   handleEditTodo: (todoId: Todo['id'], newTodoData: TodoEssentials) => Promise<void>;
   handleMoveTodo: (todoId: Todo['id'], targetListId: Todo['listId']) => Promise<void>;
   handleDeleteTodo: (id: Todo['id']) => Promise<void>;
-  handleDeleteAllComplete: () => Promise<void>;
+  handleDeleteAll: (type: 'completed' | 'active', listId: string) => Promise<void>;
   handleChangeSelectedTodoId: (id: Todo['id']) => void;
 };
 
@@ -35,8 +35,19 @@ export function TodosContextProvider({ children }: { children: ReactNode }) {
         return state.map((todo) => (todo.id === payload.id ? { ...todo, ...payload.newTodoData } : todo));
       case 'delete':
         return state.filter((todo) => todo.id !== payload);
-      case 'deleteAll':
-        return state.filter((todo) => !todo.isComplete);
+      case 'deleteAll': {
+        const { type, listId } = payload;
+
+        if (type === 'completed') {
+          return state.filter((todo) => !(todo.listId === listId && todo.isComplete));
+        }
+
+        if (type === 'active') {
+          return state.filter((todo) => !(todo.listId === listId && !todo.isComplete));
+        }
+
+        return state;
+      }
       case 'rollback':
         return payload;
       default:
@@ -78,8 +89,8 @@ export function TodosContextProvider({ children }: { children: ReactNode }) {
   const handleMoveTodo = async (todoId: Todo['id'], targetListId: Todo['listId']) => {
     const prevTodos = optimisticTodos;
     setOptimisticTodos({
-      action: 'edit',
-      payload: { id: todoId, listId: targetListId },
+      action: 'delete',
+      payload: todoId,
     });
 
     const response = await moveTodo(todoId, targetListId);
@@ -102,12 +113,12 @@ export function TodosContextProvider({ children }: { children: ReactNode }) {
     setSelectedTodoId(null);
   };
 
-  const handleDeleteAllComplete = async () => {
+  const handleDeleteAll = async (type: 'completed' | 'active', listId: string) => {
     const prevTodos = optimisticTodos;
 
-    setOptimisticTodos({ action: 'deleteAll', payload: {} });
+    setOptimisticTodos({ action: 'deleteAll', payload: { type, listId } });
 
-    const response = await deleteAllCompletedTodo();
+    const response = await deleteAllTodos(type, listId);
 
     if (!response.success) {
       toast.warning(response.message);
@@ -131,7 +142,7 @@ export function TodosContextProvider({ children }: { children: ReactNode }) {
         handleEditTodo,
         handleMoveTodo,
         handleDeleteTodo,
-        handleDeleteAllComplete,
+        handleDeleteAll,
         handleChangeSelectedTodoId,
       }}
     >

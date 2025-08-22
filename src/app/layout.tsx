@@ -1,17 +1,19 @@
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Mona_Sans, Poppins } from 'next/font/google';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const poppins = Poppins({
   subsets: ['latin'],
+  weight: ['500'],
+  variable: '--display-family',
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const mona_sans = Mona_Sans({
   subsets: ['latin'],
+  weight: ['400'],
+  variable: '--text-family',
 });
 
 export const metadata: Metadata = {
@@ -26,8 +28,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <body className={`${poppins.variable} ${mona_sans.variable} font-display antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
           {children}
           <Toaster position="bottom-right" richColors />
         </ThemeProvider>

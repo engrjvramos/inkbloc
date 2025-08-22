@@ -10,6 +10,7 @@ import { PlusIcon } from 'lucide-react';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import TodoFilters from './todo-filters';
 
 export default function TodoForm() {
   const { selectedListId, handleIncrementCount, handleDecrementCount } = useListsContext();
@@ -47,9 +48,9 @@ export default function TodoForm() {
     });
   }
   return (
-    <div>
+    <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="order-2 w-full sm:order-1">
           <FormField
             control={form.control}
             name="todo"
@@ -58,13 +59,7 @@ export default function TodoForm() {
                 <FormControl>
                   <div className="relative">
                     <PlusIcon className="text-muted-foreground absolute top-1/2 left-3 size-5 -translate-y-1/2" />
-                    <Input
-                      placeholder="Add a task..."
-                      className="h-11 max-w-sm pl-10"
-                      maxLength={250}
-                      autoFocus
-                      {...field}
-                    />
+                    <Input placeholder="Add a task..." className="h-10 pl-10" maxLength={250} autoFocus {...field} />
                   </div>
                 </FormControl>
 
@@ -74,6 +69,7 @@ export default function TodoForm() {
           />
         </form>
       </Form>
+      <TodoFilters />
     </div>
   );
 }
