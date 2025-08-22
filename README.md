@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# InkBloc - Fullstack Minimalist Todo App
 
-## Getting Started
+InkBloc is a full-stack minimalist todo app designed to keep your tasks simple and your mind clear. With a clutter-free interface, intuitive task management, and smart organization, InkBloc helps you focus on what truly matters. Create tasks, group them into lists, and star what’s important — without the overwhelm of complex features. Whether you’re planning your day, managing projects, or tracking personal goals, InkBloc keeps everything organized in a calm and elegant way.
 
-First, run the development server:
+## 🌐 Live Demo
+
+Explore InkBloc live 👉 [inkbloc.vercel.app](https://inkbloc.vercel.app)
+
+## ✨ Features
+
+| Function                         | Description                                         |
+| :------------------------------- | :-------------------------------------------------- |
+| Authentication                   | Sign up, login, and secure sessions                 |
+| Email Verification               | Ensure account security with Resend                 |
+| Forgot & Reset Password          | Recover your account seamlessly                     |
+| Dark Mode                        | Seamless light/dark theme toggle                    |
+| List & Task CRUD                 | Create, update, and manage multiple lists and todos |
+| Mark Important Tasks             | Filter by important vs non-important                |
+| Auto Grouping of Completed Tasks | Stay focused on what’s pending                      |
+| Dark Mode                        | Seamless light/dark theme toggle                    |
+| Search Tasks                     | Quickly find what matters                           |
+| Form Validations                 | Reliable and user-friendly forms                    |
+| Responsive Design                | Optimized for desktop, tablet, and mobile.          |
+| Animations                       | Beautiful transitions powered by Framer Motion.     |
+
+## 🛠 Tech Stack
+
+| Tech Stack                                      | Description                                   |
+| :---------------------------------------------- | :-------------------------------------------- |
+| [Next.js](https://nextjs.org/)                  | React framework with SSR support              |
+| [TypeScript](https://www.typescriptlang.org/)   | Strongly typed JavaScript                     |
+| [Tailwind CSS](https://tailwindcss.com/)        | Utility-first styling                         |
+| [shadcn/ui](https://ui.shadcn.com/)             | Accessible and customizable UI components     |
+| [Framer Motion](https://www.framer.com/motion/) | Smooth animations and transitions             |
+| [Better Auth](https://better-auth.com/)         | Authentication & Authorization                |
+| [Prisma](https://www.prisma.io/)                | Database ORM                                  |
+| [Resend](https://resend.com/)                   | Email delivery (verification, reset password) |
+| [React Hook Form](https://react-hook-form.com/) | Form validations                              |
+
+## 🚀 Getting Started
+
+**Fork this repo**
+You can fork this repo by clicking the fork button in the top right corner of this page.
+
+**Clone on your local machine**
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/engrjvramos/inkbloc.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Navigate to project directory**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd inkbloc
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Create a new branch**
 
-## Learn More
+```bash
+git checkout -b my-new-branch
+```
 
-To learn more about Next.js, take a look at the following resources:
+**Install dependencies**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm install
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Run the development server**
 
-## Deploy on Vercel
+```bash
+pnpm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Visit [http://localhost:3000](http://localhost:3000) to see the app in action.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📷 Screenshots
+
+![](./screenshots/screenshot_1_dark.png)
+![](./screenshots/screenshot_2_light.png)
+
+## 🤝 Contributing
+
+Contributions are welcome! If you’d like to improve **InkBloc**, please fork the repo and submit a PR.
+
+## 📄 License
+
+This project is open-source under the MIT License. Feel free to fork, modify, and build upon it.

@@ -17,9 +17,9 @@ const mona_sans = Mona_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'InkBloc - Minimalist Todo App',
+  title: 'InkBloc - Fullstack Minimalist Todo App',
   description:
-    'InkBloc is a minimalist todo app designed to keep your tasks simple, organized, and clutter-free. Stay focused on what matters with clean task management.',
+    'InkBloc is a fullstack minimalist todo app designed to keep your tasks simple, organized, and clutter-free. Stay focused on what matters with clean task management.',
   keywords: [
     'InkBloc',
     'minimalist todo app',
