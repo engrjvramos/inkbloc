@@ -2,7 +2,7 @@
 
 import { TUserTodoLists } from '@/lib/types';
 import { createList, deleteList, editList } from '@/server/list-actions';
-import { createContext, useContext, useOptimistic, useState } from 'react';
+import { createContext, useContext, useEffect, useOptimistic, useState } from 'react';
 import { toast } from 'sonner';
 
 type TListsContext = {
@@ -107,6 +107,11 @@ export function ListsContextProvider({ children, data }: ListsProviderProps) {
   };
 
   const handleDeleteList = async (listId: string) => {
+    const defaultList = data.find((list) => list.isDefault);
+    if (listId === defaultList?.id) {
+      toast.error('Default list cannot be deleted');
+      return;
+    }
     setOptimisticLists({ action: 'delete', payload: listId });
     const response = await deleteList(listId);
 
@@ -118,6 +123,8 @@ export function ListsContextProvider({ children, data }: ListsProviderProps) {
     if (selectedListId === listId) {
       setSelectedListId(null);
     }
+
+    toast.success('List deleted successfully');
   };
 
   const handleIncrementCount = async () => {
@@ -131,6 +138,15 @@ export function ListsContextProvider({ children, data }: ListsProviderProps) {
   const handleChangeSelectedListId = (id: string) => {
     setSelectedListId(id);
   };
+
+  useEffect(() => {
+    if (!selectedListId && data.length > 0) {
+      const defaultList = data.find((list) => list.isDefault);
+      if (defaultList) {
+        setSelectedListId(defaultList.id);
+      }
+    }
+  }, [selectedListId, data]);
 
   return (
     <ListsContext.Provider

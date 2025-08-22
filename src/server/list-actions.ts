@@ -101,11 +101,18 @@ export async function deleteList(listId: string): Promise<ApiResponse> {
   try {
     const existing = await prisma.list.findUnique({
       where: { id: listId },
-      select: { userId: true },
+      select: { userId: true, isDefault: true },
     });
 
     if (!existing || existing.userId !== session.user.id) {
       return { success: false, message: 'Not allowed' };
+    }
+
+    if (existing.isDefault) {
+      return {
+        success: false,
+        message: 'Default list cannot be deleted',
+      };
     }
 
     await prisma.list.delete({

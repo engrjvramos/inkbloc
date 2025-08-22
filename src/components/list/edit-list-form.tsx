@@ -1,6 +1,7 @@
 import { listSchema, TListSchema } from '@/lib/schema';
+import { TUserTodoLists } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusIcon } from 'lucide-react';
+import { EditIcon } from 'lucide-react';
 import { startTransition, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -15,29 +16,36 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 
-export default function AddListForm() {
+type Props = {
+  initialValues?: TUserTodoLists;
+  onFormSubmission: () => void;
+};
+
+export default function EditListForm({ initialValues, onFormSubmission }: Props) {
   const [open, setOpen] = useState(false);
-  const { handleAddList } = useListsContext();
+  const { handleEditList } = useListsContext();
 
   const form = useForm<TListSchema>({
     resolver: zodResolver(listSchema),
     defaultValues: {
-      title: '',
+      title: initialValues?.title,
     },
   });
 
   async function onSubmit(values: TListSchema) {
-    if (!values) return;
+    if (!values || !initialValues) return;
     const prevValue = values;
     form.reset();
     setOpen(false);
+    onFormSubmission();
 
     startTransition(async () => {
       try {
-        await handleAddList(values.title);
+        await handleEditList(initialValues.id, values);
       } catch (error) {
         const e = error as Error;
         toast.error(e.message || 'Failed to add todo');
@@ -49,15 +57,15 @@ export default function AddListForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={'ghost'} className="rounded-none outline-none focus-within:ring-0">
-          <PlusIcon size={16} aria-hidden="true" />
-          Add List
-        </Button>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <EditIcon size={16} aria-hidden="true" />
+          Rename List
+        </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent className="gap-8">
         <DialogHeader>
-          <DialogTitle>Add List</DialogTitle>
-          <DialogDescription className="sr-only">Add List</DialogDescription>
+          <DialogTitle>Rename List</DialogTitle>
+          <DialogDescription className="sr-only">Rename List</DialogDescription>
         </DialogHeader>
         <div>
           <Form {...form}>
@@ -73,7 +81,7 @@ export default function AddListForm() {
                         placeholder="Enter your list title..."
                         className="h-11"
                         maxLength={100}
-                        autoFocus
+                        autoFocus={false}
                         {...field}
                       />
                     </FormControl>
@@ -85,13 +93,13 @@ export default function AddListForm() {
 
               <div className="flex items-center justify-end gap-2">
                 <DialogClose asChild>
-                  <Button type="button" variant={'outline'} className="">
+                  <Button type="button" variant={'outline'} onClick={() => form.reset()}>
                     Cancel
                   </Button>
                 </DialogClose>
 
                 <Button type="submit" className="">
-                  Add List
+                  Rename
                 </Button>
               </div>
             </form>
