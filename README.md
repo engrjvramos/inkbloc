@@ -1,6 +1,6 @@
 # InkBloc - Fullstack Minimalist Todo App
 
-InkBloc is a full-stack minimalist todo app designed to keep your tasks simple and your mind clear. With a clutter-free interface, intuitive task management, and smart organization, InkBloc helps you focus on what truly matters. Create tasks, group them into lists, and star what’s important — without the overwhelm of complex features. Whether you’re planning your day, managing projects, or tracking personal goals, InkBloc keeps everything organized in a calm and elegant way.
+A fullstack minimalist todo app built for simplicity, speed, and focus. InkBloc helps you manage your tasks with ease while keeping the interface distraction-free.
 
 ## 🌐 Live Demo
 
@@ -32,10 +32,11 @@ Explore InkBloc live 👉 [inkbloc.vercel.app](https://inkbloc.vercel.app)
 | [Tailwind CSS](https://tailwindcss.com/)        | Utility-first styling                         |
 | [shadcn/ui](https://ui.shadcn.com/)             | Accessible and customizable UI components     |
 | [Framer Motion](https://www.framer.com/motion/) | Smooth animations and transitions             |
+| [React Hook Form](https://react-hook-form.com/) | Form validations                              |
 | [Better Auth](https://better-auth.com/)         | Authentication & Authorization                |
 | [Prisma](https://www.prisma.io/)                | Database ORM                                  |
+| [Neon](https://neon.com/)                       | Postgres database platform                    |
 | [Resend](https://resend.com/)                   | Email delivery (verification, reset password) |
-| [React Hook Form](https://react-hook-form.com/) | Form validations                              |
 
 ## 🚀 Getting Started
 
