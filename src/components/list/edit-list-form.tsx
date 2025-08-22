@@ -39,7 +39,6 @@ export default function EditListForm({ initialValues, onFormSubmission }: Props)
   async function onSubmit(values: TListSchema) {
     if (!values || !initialValues) return;
     const prevValue = values;
-    form.reset();
     setOpen(false);
     onFormSubmission();
 
@@ -59,7 +58,7 @@ export default function EditListForm({ initialValues, onFormSubmission }: Props)
       <DialogTrigger asChild>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
           <EditIcon size={16} aria-hidden="true" />
-          Rename List
+          Rename list
         </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent className="gap-8">

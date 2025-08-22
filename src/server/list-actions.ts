@@ -31,7 +31,7 @@ export async function getTodoLists() {
   return data;
 }
 
-export async function createList(title: string): Promise<ApiResponse> {
+export async function createList(title: string) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -41,7 +41,7 @@ export async function createList(title: string): Promise<ApiResponse> {
   }
 
   try {
-    await prisma.list.create({
+    const list = await prisma.list.create({
       data: {
         title,
         userId: session.user.id,
@@ -49,7 +49,7 @@ export async function createList(title: string): Promise<ApiResponse> {
       },
     });
     revalidatePath('/', 'layout');
-    return { success: true, message: 'List created successfully' };
+    return { success: true, message: 'List created successfully', data: list };
   } catch (error) {
     console.error(error);
     return { success: false, message: 'Failed to create list' };

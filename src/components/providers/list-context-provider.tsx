@@ -17,6 +17,7 @@ type TListsContext = {
   handleChangeSelectedListId: (id: string) => void;
   handleIncrementCount: () => Promise<void>;
   handleDecrementCount: () => Promise<void>;
+  handleDecrementCountBy: (amount: number) => void;
 };
 
 const ListsContext = createContext<TListsContext | null>(null);
@@ -71,7 +72,20 @@ export function ListsContextProvider({ children, data }: ListsProviderProps) {
               }
             : list,
         );
-
+      case 'decrementCountBy':
+        return state.map((list) =>
+          list.id === payload.listId
+            ? {
+                ...list,
+                _count: {
+                  ...list._count,
+                  todos: Math.max(0, list._count.todos - payload.amount),
+                },
+              }
+            : list,
+        );
+      case 'replaceId':
+        return state.map((list) => (list.id === payload.tempId ? { ...list, id: payload.realId } : list));
       default:
         return state;
     }
@@ -85,15 +99,28 @@ export function ListsContextProvider({ children, data }: ListsProviderProps) {
   const selectedList = optimisticLists.find((list) => list.id === selectedListId);
   const listsCount = optimisticLists.length;
 
-  // handlers
   const handleAddList = async (title: string) => {
-    setOptimisticLists({ action: 'add', payload: { title } });
+    const tempId = crypto.randomUUID();
+
+    setOptimisticLists({
+      action: 'add',
+      payload: { id: tempId, title },
+    });
+    setSelectedListId(tempId);
+
     const response = await createList(title);
 
-    if (!response.success) {
+    if (!response.success || !response.data) {
+      setOptimisticLists({ action: 'delete', payload: { id: tempId } });
       toast.warning(response.message);
       return;
     }
+
+    setOptimisticLists({
+      action: 'replaceId',
+      payload: { tempId, realId: response.data.id },
+    });
+    setSelectedListId(response.data.id);
   };
 
   const handleEditList = async (listId: string, newListData: Partial<TUserTodoLists>) => {
@@ -124,7 +151,7 @@ export function ListsContextProvider({ children, data }: ListsProviderProps) {
       setSelectedListId(null);
     }
 
-    toast.success('List deleted successfully');
+    toast.success('List deleted');
   };
 
   const handleIncrementCount = async () => {
@@ -133,6 +160,13 @@ export function ListsContextProvider({ children, data }: ListsProviderProps) {
 
   const handleDecrementCount = async () => {
     setOptimisticLists({ action: 'decrementCount', payload: { listId: selectedListId } });
+  };
+
+  const handleDecrementCountBy = (amount: number) => {
+    setOptimisticLists({
+      action: 'decrementCountBy',
+      payload: { listId: selectedListId, amount },
+    });
   };
 
   const handleChangeSelectedListId = (id: string) => {
@@ -161,6 +195,7 @@ export function ListsContextProvider({ children, data }: ListsProviderProps) {
         handleChangeSelectedListId,
         handleIncrementCount,
         handleDecrementCount,
+        handleDecrementCountBy,
       }}
     >
       {children}

@@ -6,6 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { todoSchema, TTodoSchema } from '@/lib/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { PlusIcon } from 'lucide-react';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -55,7 +56,16 @@ export default function TodoForm() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input placeholder="Type a todo..." className="h-11" maxLength={250} autoFocus {...field} />
+                  <div className="relative">
+                    <PlusIcon className="text-muted-foreground absolute top-1/2 left-3 size-5 -translate-y-1/2" />
+                    <Input
+                      placeholder="Add a task..."
+                      className="h-11 max-w-sm pl-10"
+                      maxLength={250}
+                      autoFocus
+                      {...field}
+                    />
+                  </div>
                 </FormControl>
 
                 <FormMessage />

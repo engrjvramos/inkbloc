@@ -12,8 +12,8 @@ export default async function PageLayout({ children }: { children: ReactNode }) 
 
   return (
     <div className="flex h-dvh flex-col overflow-x-hidden">
-      <div className="mx-auto w-full max-w-[80rem]">
-        <Header userSession={session.user} />
+      <Header userSession={session.user} />
+      <div className="mx-auto w-full max-w-[70rem] flex-1">
         <main className="flex-1 px-5 py-10">
           <FiltersContextProvider>
             <ListsContextProvider data={lists}>
@@ -22,6 +22,7 @@ export default async function PageLayout({ children }: { children: ReactNode }) 
           </FiltersContextProvider>
         </main>
       </div>
+      {/* <Footer /> */}
     </div>
   );
 }

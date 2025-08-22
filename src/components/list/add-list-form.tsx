@@ -85,7 +85,7 @@ export default function AddListForm() {
 
               <div className="flex items-center justify-end gap-2">
                 <DialogClose asChild>
-                  <Button type="button" variant={'outline'} className="">
+                  <Button type="button" variant={'outline'} className="" onClick={() => form.reset()}>
                     Cancel
                   </Button>
                 </DialogClose>

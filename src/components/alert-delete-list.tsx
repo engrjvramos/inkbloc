@@ -14,17 +14,18 @@ import {
 import { DropdownMenuItem } from './ui/dropdown-menu';
 
 type Props = {
+  type: 'completed' | 'list';
   handleDelete?: () => Promise<void>;
   isDisabled?: boolean;
 };
 
-export default function AlertDeleteList({ handleDelete, isDisabled }: Props) {
+export default function AlertDeleteList({ type, handleDelete, isDisabled }: Props) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()} disabled={isDisabled}>
           <TrashIcon size={16} aria-hidden="true" />
-          Delete List
+          Delete {type === 'list' ? 'list' : 'all completed tasks'}
         </DropdownMenuItem>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -33,15 +34,15 @@ export default function AlertDeleteList({ handleDelete, isDisabled }: Props) {
             <CircleAlertIcon className="opacity-80" size={16} />
           </div>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Delete {type === 'list' ? 'list?' : 'all completed tasks?'}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this list? All your tasks on this list will be permanently deleted.
+              All your {type === 'completed' && 'completed'} tasks will be permanently deleted from this list.
             </AlertDialogDescription>
           </AlertDialogHeader>
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete}>Confirm</AlertDialogAction>
+          <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

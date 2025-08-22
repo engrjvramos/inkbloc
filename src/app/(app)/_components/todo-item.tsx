@@ -1,8 +1,10 @@
+import MoveTodo from '@/components/todo/move-todo';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -17,9 +19,10 @@ type Props = {
   todo: Todo;
   handleToggleField: (id: string, todo: Todo, field: 'isComplete' | 'isImportant') => Promise<void>;
   handleDelete: (id: string) => Promise<void>;
+  handleMoveTask: (currentTodoId: string, targetListId: string) => Promise<void>;
 };
 
-export default function TodoItem({ todo, handleDelete, handleToggleField }: Props) {
+export default function TodoItem({ todo, handleDelete, handleToggleField, handleMoveTask }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -31,7 +34,21 @@ export default function TodoItem({ todo, handleDelete, handleToggleField }: Prop
           checked={todo.isComplete}
           onCheckedChange={() => handleToggleField(todo.id, todo, 'isComplete')}
         />
-        <span className={cn(todo.isComplete && 'line-through opacity-50')}>{todo.todo}</span>
+        <div className="flex flex-col">
+          <span className={cn(todo.isComplete && 'line-through opacity-50')}>{todo.todo}</span>
+          {todo.isComplete && (
+            <span className="text-muted-foreground text-sm">
+              Completed:{' '}
+              {new Date(todo.updatedAt).toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <Button
@@ -50,7 +67,10 @@ export default function TodoItem({ todo, handleDelete, handleToggleField }: Prop
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <EditForm initialValues={todo} setDropdownOpen={setOpen} />
+            <DropdownMenuGroup>
+              <MoveTodo todo={todo} handleMoveTask={handleMoveTask} onFormSubmission={() => setOpen(false)} />
+              <EditForm initialValues={todo} setDropdownOpen={setOpen} />
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={() => handleDelete(todo.id)}>
               <TrashIcon size={16} aria-hidden="true" />

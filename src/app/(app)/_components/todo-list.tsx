@@ -5,6 +5,7 @@ import EditListForm from '@/components/list/edit-list-form';
 import { useFiltersContext } from '@/components/providers/filters-context-provider';
 import { useListsContext } from '@/components/providers/list-context-provider';
 import { useTodosContext } from '@/components/providers/note-context-provider';
+import { NoTaskDark, NoTaskLight } from '@/components/svg';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,13 +16,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Todo } from '@prisma/client';
 import { MoreVerticalIcon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import TodoItem from './todo-item';
 
 export default function TodoList() {
-  const { handleIncrementCount, handleDecrementCount, selectedList, handleDeleteList } = useListsContext();
-  const { todos, handleDeleteTodo, handleEditTodo } = useTodosContext();
+  const { theme } = useTheme();
+  const { handleIncrementCount, handleDecrementCount, selectedList, handleDeleteList, handleDecrementCountBy } =
+    useListsContext();
+  const { todos, handleDeleteTodo, handleEditTodo, handleDeleteAllComplete, handleMoveTodo } = useTodosContext();
   const { searchQuery, selectedStatuses } = useFiltersContext();
   const [, startTransition] = useTransition();
 
@@ -107,7 +111,6 @@ export default function TodoList() {
     startTransition(async () => {
       try {
         await handleDeleteList(id);
-        toast.success('List deleted');
       } catch (error) {
         const e = error as Error;
         toast.error(e.message || 'Failed to delete list');
@@ -115,42 +118,109 @@ export default function TodoList() {
     });
   }
 
+  async function onDeleteAllCompleted() {
+    setOpen(false);
+
+    startTransition(async () => {
+      handleDecrementCountBy(completedTodos.length);
+      try {
+        await handleDeleteAllComplete();
+      } catch (error) {
+        const e = error as Error;
+        toast.error(e.message || 'Failed to delete completed todos');
+      }
+    });
+  }
+
+  async function moveTask(currentTodoId: string, targetListId: string) {
+    startTransition(async () => {
+      try {
+        await handleMoveTodo(currentTodoId, targetListId);
+        toast.success('Task moved');
+      } catch (error) {
+        const e = error as Error;
+        toast.error(e.message || 'Failed to move todo');
+      }
+    });
+  }
+
   return (
-    <div className="bg-input/50 flex flex-col gap-5 rounded-xl p-5 sm:p-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl">{selectedList?.title}</h1>
-        <DropdownMenu open={open} onOpenChange={setOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="blank" className="hover:bg-input/30 size-8">
-              <MoreVerticalIcon className="opacity-60" size={16} aria-hidden="true" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <EditListForm initialValues={selectedList} onFormSubmission={() => setOpen(false)} />
-            <DropdownMenuSeparator />
-            <AlertDeleteList
-              handleDelete={selectedList ? () => onDeleteList(selectedList.id) : undefined}
-              isDisabled={selectedList?.isDefault}
-            />
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <div className="flex flex-col gap-5">
+      <div className="bg-background rounded-xl border">
+        <div className="flex items-center justify-between gap-2 border-b p-4">
+          <h1 className="truncate px-4 text-lg">
+            {selectedList?.title}
+            {activeTodos.length > 0 && (
+              <span className="text-muted-foreground ml-2 font-mono">({activeTodos.length})</span>
+            )}
+          </h1>
+          <DropdownMenu open={open} onOpenChange={setOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="blank" className="hover:bg-input/30 size-8">
+                <MoreVerticalIcon className="opacity-60" size={16} aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <EditListForm initialValues={selectedList} onFormSubmission={() => setOpen(false)} />
+              <DropdownMenuSeparator />
+              <AlertDeleteList
+                type="list"
+                handleDelete={selectedList ? () => onDeleteList(selectedList.id) : undefined}
+                isDisabled={selectedList?.isDefault}
+              />
+              <AlertDeleteList
+                type="completed"
+                handleDelete={selectedList ? onDeleteAllCompleted : undefined}
+                isDisabled={completedTodos.length === 0}
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <ul className="no-scrollbar flex max-h-[calc(100dvh-18rem)] w-full flex-col gap-1.5 overflow-y-auto p-4">
+          {activeTodos.length === 0 ? (
+            <div className="my-12 flex flex-col items-center gap-5">
+              {theme === 'light' ? <NoTaskLight /> : <NoTaskDark />}
+              <div className="ext-balance max-w-xs space-y-2 text-center">
+                <p className="text-xl">No tasks yet</p>
+                <p className="text-muted-foreground">
+                  You have no tasks in your list. Add new tasks to stay organized and productive.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {activeTodos.map((todo) => (
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  handleToggleField={handleToggleField}
+                  handleDelete={handleDelete}
+                  handleMoveTask={moveTask}
+                />
+              ))}
+            </>
+          )}
+        </ul>
       </div>
-      <ul className="no-scrollbar flex max-h-[calc(100dvh-18rem)] w-full flex-col gap-2 overflow-y-auto">
-        {activeTodos.map((todo) => (
-          <TodoItem key={todo.id} todo={todo} handleToggleField={handleToggleField} handleDelete={handleDelete} />
-        ))}
-      </ul>
       {completedTodos.length > 0 && (
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="item-1" className="bg-background rounded-xl px-4">
-            <AccordionTrigger className="">
-              <div className="text-base">
-                Completed <span className="text-muted-foreground font-mono">({completedTodos.length})</span>
+        <Accordion type="single" collapsible className="w-full rounded-xl border">
+          <AccordionItem value="item-1" className="bg-background rounded-xl">
+            <AccordionTrigger className="rounded-xl px-4">
+              <div className="flex w-full items-center justify-between text-base">
+                <div>
+                  Completed <span className="text-muted-foreground font-mono">({completedTodos.length})</span>
+                </div>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-4 text-balance">
+            <AccordionContent className="flex flex-col gap-1.5 p-4 text-balance">
               {completedTodos.map((todo) => (
-                <TodoItem key={todo.id} todo={todo} handleToggleField={handleToggleField} handleDelete={handleDelete} />
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  handleToggleField={handleToggleField}
+                  handleDelete={handleDelete}
+                  handleMoveTask={moveTask}
+                />
               ))}
             </AccordionContent>
           </AccordionItem>
