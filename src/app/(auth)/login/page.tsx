@@ -90,8 +90,8 @@ export default function LoginPage() {
   return (
     <Card className="w-full max-w-[540px] gap-12 p-8 sm:p-12">
       <CardHeader className="justify-center px-0 text-center">
-        <div className="mb-4 flex items-center justify-center gap-2 text-2xl">
-          <span className="font-pacifico">InkBloc</span>
+        <div className="mb-4 flex items-center justify-center gap-2 text-4xl">
+          <span className="font-text">InkBloc.</span>
         </div>
         <CardTitle className="text-2xl">Welcome to InkBloc</CardTitle>
         <CardDescription className="">Please login to continue</CardDescription>
@@ -214,7 +214,7 @@ export default function LoginPage() {
         <p className="text-muted-foreground text-sm">
           No account yet?{' '}
           <Link href={'/register'} className="text-foreground hover:underline">
-            Register
+            Sign Up
           </Link>
         </p>
       </CardFooter>
