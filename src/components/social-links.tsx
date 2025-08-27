@@ -45,7 +45,7 @@ export default function SocialLinks() {
         <DialogHeader className="items-center justify-center py-5">
           <DialogTitle className="text-2xl">Jose Roberto Ramos</DialogTitle>
           <DialogDescription className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border px-2 py-1 font-mono text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] [&>svg]:pointer-events-none [&>svg]:size-3">
-            Full-Stack Developer
+            Frontend Developer
           </DialogDescription>
         </DialogHeader>
 
